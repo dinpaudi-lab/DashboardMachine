@@ -245,40 +245,48 @@ function attachEventListeners(){
   const elClose = $('close-modal')
   if(elClose) elClose.addEventListener('click', closeModal)
   
-  const elSave = $('save-edit')
-  if(elSave) elSave.addEventListener('click', async ()=>{
-    const id = Number($('modal-machine-id').textContent)
-    const newC = $('modal-construct').value
-    const editor = $('modal-editor').value || 'Unknown'
-    const old = machines[id-1] && machines[id-1].constructId
-    
-    if(machines[id-1]) machines[id-1].constructId = newC
-    saveMachines()
-    
-    // Save to cloud
-    if (typeof saveMachineToCloud !== 'undefined' && window.isCloudAvailable) {
-      try {
-        await saveMachineToCloud(id, newC, getCurrentUserId(), old)
-        console.log('✅ Machine saved to cloud')
-      } catch (e) {
-        console.error('❌ Cloud save error:', e)
-      }
+const elSave = $('save-edit')
+if(elSave) elSave.addEventListener('click', async ()=>{
+  const id = Number($('modal-machine-id').textContent)
+  const newC = $('modal-construct').value
+  const editor = $('modal-editor').value || 'Unknown'
+  const old = machines[id-1] && machines[id-1].constructId
+  
+  // Update local first for instant feedback
+  if(machines[id-1]) machines[id-1].constructId = newC
+  saveMachines()
+  
+  // Close modal and update UI immediately
+  closeModal()
+  renderGrid()
+  renderLegend()
+  updateChart()
+  showToast('Mesin diperbarui ☁️', 'success')
+  
+  // Save to cloud in background
+  if (typeof saveMachineToCloud !== 'undefined' && window.isCloudAvailable) {
+    try {
+      await saveMachineToCloud(id, newC, getCurrentUserId(), old)
+      console.log('✅ Machine saved to cloud')
+    } catch (e) {
+      console.error('❌ Cloud save error:', e)
+      // Revert on error
+      if(machines[id-1]) machines[id-1].constructId = old
+      saveMachines()
+      renderGrid()
+      showToast('⚠️ Gagal save ke cloud, dicoba lagi', 'warn')
     }
-    
-    await addHistory({
-      machine:id, 
-      from:old, 
-      to:newC, 
-      editor:editor, 
-      date:new Date().toISOString()
-    })
-    
-    closeModal()
-    renderGrid()
-    renderLegend()
-    updateChart()
-    showToast('Mesin diperbarui ☁️', 'success')
+  }
+  
+  // Add to history
+  await addHistory({
+    machine:id, 
+    from:old, 
+    to:newC, 
+    editor:editor, 
+    date:new Date().toISOString()
   })
+})
   
   const elConstClose = $('close-const-modal')
   if(elConstClose) elConstClose.addEventListener('click', closeConstModal)
@@ -976,3 +984,4 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
