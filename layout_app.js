@@ -488,7 +488,7 @@ function renderGrid(){
     }
   }
   
-  function createMachineBox(machineNum, blockName, filter) {
+ function createMachineBox(machineNum, blockName, filter) {
     const m = machines[machineNum-1] || {id:machineNum, constructId:null}
     const box = document.createElement('div')
     box.className = 'machine-box'
@@ -500,8 +500,9 @@ function renderGrid(){
     box.style.justifyContent = 'center'
     box.title = `Mesin ${machineNum} - Blok ${blockName}`
     box.textContent = machineNum
-    // Store actual machine number as data attribute - FIX UNTUK BUG EDIT
-box.setAttribute('data-machine-id', machineNum)
+    
+    // Store actual machine number as data attribute
+    box.setAttribute('data-machine-id', machineNum)
     
     const c = constructions.find(x=> x.id === m.constructId)
     box.style.background = c ? c.color : '#262626'
@@ -519,10 +520,11 @@ box.setAttribute('data-machine-id', machineNum)
       const constructName = c ? c.name : 'Belum ditugaskan'
       box.title = `Mesin ${machineNum} - Blok ${blockName}\nKonstruksi: ${constructName}`
       box.addEventListener('click', (e)=>{ 
-  const machineId = parseInt(e.currentTarget.getAttribute('data-machine-id'))
-  openModal(machineId) 
-})
+        const machineId = parseInt(e.currentTarget.getAttribute('data-machine-id'))
+        openModal(machineId) 
+      })
     }
+    
     return { element: box, matches: matches }
   }
   
@@ -980,6 +982,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
