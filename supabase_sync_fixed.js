@@ -1,7 +1,7 @@
 // ============ SUPABASE SYNC LAYER - WITH DEBUG ============
 // Real-time sync dengan Supabase database
 
-const SUPABASE_URL = 'https://omkqvtlvabwblgijodxhe.supabase.co'
+const SUPABASE_URL = https://omkovtlvabwblgijodxe.supabase.co
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ta3F2dGx2YWJ3YmxnaWpvZHhoZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzYzNzkwNjM4LCJleHAiOjIwNzkzNjY2Mzh9._9CRzqxKd450pX5ZgVAaocCUfWh5vV2GJXIFK3XAGKc'
 
 let supabase = null
