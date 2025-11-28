@@ -500,6 +500,8 @@ function renderGrid(){
     box.style.justifyContent = 'center'
     box.title = `Mesin ${machineNum} - Blok ${blockName}`
     box.textContent = machineNum
+    // Store actual machine number as data attribute - FIX UNTUK BUG EDIT
+box.setAttribute('data-machine-id', machineNum)
     
     const c = constructions.find(x=> x.id === m.constructId)
     box.style.background = c ? c.color : '#262626'
@@ -516,8 +518,10 @@ function renderGrid(){
       box.style.border = filter ? '2px solid #ffd166' : '1px solid rgba(255,255,255,0.04)'
       const constructName = c ? c.name : 'Belum ditugaskan'
       box.title = `Mesin ${machineNum} - Blok ${blockName}\nKonstruksi: ${constructName}`
-      box.addEventListener('click', ()=>{ openModal(machineNum) })
-    }
+      box.addEventListener('click', (e)=>{ 
+  const machineId = parseInt(e.currentTarget.getAttribute('data-machine-id'))
+  openModal(machineId) 
+})
     
     return { element: box, matches: matches }
   }
@@ -976,5 +980,6 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
