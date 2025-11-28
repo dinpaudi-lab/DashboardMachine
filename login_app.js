@@ -1,19 +1,46 @@
-// Login authentication script - Supabase version
+// Login authentication script - Supabase version with proper initialization
 const SESSION_KEY = 'app_session_token'
+
+// Wait for Supabase to be loaded
+function waitForSupabase() {
+  return new Promise((resolve, reject) => {
+    let attempts = 0
+    const maxAttempts = 50
+    
+    const checkSupabase = setInterval(() => {
+      attempts++
+      
+      if (typeof supabaseInit !== 'undefined') {
+        clearInterval(checkSupabase)
+        resolve(true)
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkSupabase)
+        reject(new Error('Supabase failed to load'))
+      }
+    }, 100)
+  })
+}
 
 document.addEventListener('DOMContentLoaded', async function(){
   const form = document.getElementById('login-form')
   const usernameInput = document.getElementById('username')
   const passwordInput = document.getElementById('password')
   const errorMessage = document.getElementById('error-message')
-  const loginBtn = document.getElementById('login-btn')
+  const loginBtn = form.querySelector('.login-btn')
   
-  // Initialize Supabase
+  // Wait for Supabase to be available
   try {
+    console.log('⏳ Waiting for Supabase...')
+    await waitForSupabase()
+    console.log('✅ Supabase functions available')
+    
+    // Initialize Supabase
     await supabaseInit()
-    console.log('✅ Supabase ready')
+    console.log('✅ Supabase initialized')
   } catch (e) {
-    console.error('Supabase init error:', e)
+    console.error('❌ Supabase initialization error:', e)
+    showError('Gagal memuat sistem. Refresh halaman.')
+    return
   }
   
   form.addEventListener('submit', async function(e){
@@ -22,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     const email = usernameInput.value.trim()
     const password = passwordInput.value
     
-    console.log('Login attempt:', email)
+    console.log('🔐 Login attempt:', email)
     
     // Validate
     if(!email || !password){
@@ -31,10 +58,8 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
     
     // Show loading
-    if(loginBtn) {
-      loginBtn.disabled = true
-      loginBtn.textContent = 'Proses...'
-    }
+    loginBtn.disabled = true
+    loginBtn.textContent = 'Memproses...'
     
     try {
       // Authenticate
@@ -49,29 +74,41 @@ document.addEventListener('DOMContentLoaded', async function(){
         localStorage.setItem('currentUserId', user.uid)
         localStorage.setItem('currentUserEmail', email)
         
-        // Redirect
+        // Show success message
+        showSuccess('Login berhasil! Mengalihkan...')
+        
+        // Redirect after delay
         setTimeout(() => {
           window.location.href = 'layout.html'
-        }, 500)
+        }, 800)
       }
     } catch (error) {
-      console.error('Login error:', error.message)
+      console.error('❌ Login error:', error.message)
       showError('Email atau sandi salah')
       passwordInput.value = ''
       passwordInput.focus()
     } finally {
-      if(loginBtn) {
-        loginBtn.disabled = false
-        loginBtn.textContent = 'Masuk'
-      }
+      loginBtn.disabled = false
+      loginBtn.textContent = 'Masuk'
     }
   })
   
   function showError(message){
-    errorMessage.textContent = message
+    errorMessage.textContent = '❌ ' + message
+    errorMessage.style.background = 'rgba(239, 68, 68, 0.1)'
+    errorMessage.style.borderColor = 'rgba(239, 68, 68, 0.3)'
+    errorMessage.style.color = '#fca5a5'
     errorMessage.classList.add('show')
     setTimeout(() => {
       errorMessage.classList.remove('show')
     }, 4000)
+  }
+  
+  function showSuccess(message){
+    errorMessage.textContent = '✅ ' + message
+    errorMessage.style.background = 'rgba(34, 197, 94, 0.1)'
+    errorMessage.style.borderColor = 'rgba(34, 197, 94, 0.3)'
+    errorMessage.style.color = '#86efac'
+    errorMessage.classList.add('show')
   }
 })
