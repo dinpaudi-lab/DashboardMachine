@@ -522,7 +522,7 @@ box.setAttribute('data-machine-id', machineNum)
   const machineId = parseInt(e.currentTarget.getAttribute('data-machine-id'))
   openModal(machineId) 
 })
-    
+    }
     return { element: box, matches: matches }
   }
   
@@ -980,6 +980,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
