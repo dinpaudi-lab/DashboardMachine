@@ -252,33 +252,19 @@ if(elSave) elSave.addEventListener('click', async ()=>{
   const editor = $('modal-editor').value || 'Unknown'
   const old = machines[id-1] && machines[id-1].constructId
   
-  // Update local first for instant feedback
   if(machines[id-1]) machines[id-1].constructId = newC
   saveMachines()
   
-  // Close modal and update UI immediately
-  closeModal()
-  renderGrid()
-  renderLegend()
-  updateChart()
-  showToast('Mesin diperbarui ☁️', 'success')
-  
-  // Save to cloud in background
+  // Save to cloud
   if (typeof saveMachineToCloud !== 'undefined' && window.isCloudAvailable) {
     try {
       await saveMachineToCloud(id, newC, getCurrentUserId(), old)
       console.log('✅ Machine saved to cloud')
     } catch (e) {
       console.error('❌ Cloud save error:', e)
-      // Revert on error
-      if(machines[id-1]) machines[id-1].constructId = old
-      saveMachines()
-      renderGrid()
-      showToast('⚠️ Gagal save ke cloud, dicoba lagi', 'warn')
     }
   }
   
-  // Add to history
   await addHistory({
     machine:id, 
     from:old, 
@@ -286,6 +272,12 @@ if(elSave) elSave.addEventListener('click', async ()=>{
     editor:editor, 
     date:new Date().toISOString()
   })
+  
+  closeModal()
+  renderGrid()
+  renderLegend()
+  updateChart()
+  showToast('Mesin diperbarui ☁️', 'success')
 })
   
   const elConstClose = $('close-const-modal')
@@ -984,4 +976,5 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
