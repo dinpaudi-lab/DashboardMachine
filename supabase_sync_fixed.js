@@ -1,8 +1,8 @@
-// ============ SUPABASE SYNC LAYER - FIXED ============
+// ============ SUPABASE SYNC LAYER - WITH DEBUG ============
 // Real-time sync dengan Supabase database
 
 const SUPABASE_URL = 'https://omkqvtlvabwblgijodxhe.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ta292dGx2YWJ3YmxnaWpvZHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3OTA2MzgsImV4cCI6MjA3OTM2NjYzOH0._9CRzqxKd450pX5ZgVAaocCUfWh5vV2GJXIFK3XAGKc'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ta3F2dGx2YWJ3YmxnaWpvZHhoZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzYzNzkwNjM4LCJleHAiOjIwNzkzNjY2Mzh9._9CRzqxKd450pX5ZgVAaocCUfWh5vV2GJXIFK3XAGKc'
 
 let supabase = null
 let isCloudAvailable = false
@@ -13,10 +13,41 @@ let realtimeChannels = []
 
 async function supabaseInit() {
   try {
+    console.log('🔧 Starting Supabase initialization...')
+    console.log('📍 Supabase URL:', SUPABASE_URL)
+    
     // Check if already initialized
     if (supabase && isCloudAvailable) {
       console.log('✅ Supabase already initialized')
       return true
+    }
+
+    // Test network connectivity first
+    console.log('🌐 Testing network connectivity...')
+    try {
+      const testResponse = await fetch('https://www.google.com/favicon.ico', { 
+        mode: 'no-cors',
+        cache: 'no-cache'
+      })
+      console.log('✅ Network is available')
+    } catch (netErr) {
+      console.error('❌ Network connectivity issue:', netErr)
+      throw new Error('No network connection')
+    }
+
+    // Test Supabase URL accessibility
+    console.log('🔍 Testing Supabase URL accessibility...')
+    try {
+      const urlTest = await fetch(SUPABASE_URL + '/rest/v1/', {
+        method: 'HEAD',
+        headers: {
+          'apikey': SUPABASE_KEY
+        }
+      })
+      console.log('✅ Supabase URL is accessible:', urlTest.status)
+    } catch (urlErr) {
+      console.error('❌ Cannot reach Supabase URL:', urlErr)
+      throw new Error('Supabase URL not accessible')
     }
 
     // Lazy load Supabase SDK
@@ -24,14 +55,21 @@ async function supabaseInit() {
       console.log('📦 Loading Supabase SDK...')
       const script = document.createElement('script')
       script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+      
       await new Promise((resolve, reject) => {
-        script.onload = resolve
-        script.onerror = () => reject(new Error('Failed to load Supabase SDK'))
+        script.onload = () => {
+          console.log('✅ Supabase SDK loaded')
+          resolve()
+        }
+        script.onerror = (err) => {
+          console.error('❌ Failed to load Supabase SDK:', err)
+          reject(new Error('Failed to load Supabase SDK'))
+        }
         document.head.appendChild(script)
       })
-      console.log('✅ Supabase SDK loaded')
     }
 
+    console.log('🔨 Creating Supabase client...')
     const { createClient } = window.supabase
     supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
       realtime: {
@@ -41,17 +79,40 @@ async function supabaseInit() {
       }
     })
     
-    // Test connection
-    const { data, error } = await supabase.from('machines').select('count').limit(1)
-    if (error) throw error
+    console.log('✅ Supabase client created')
+    
+    // Test connection with a simple query
+    console.log('🧪 Testing database connection...')
+    const { data, error } = await supabase
+      .from('machines')
+      .select('count')
+      .limit(1)
+    
+    if (error) {
+      console.error('❌ Database test failed:', error)
+      throw error
+    }
     
     isCloudAvailable = true
     console.log('✅ Supabase initialized successfully')
     console.log('📡 Real-time enabled')
+    console.log('🎉 Cloud status: AVAILABLE')
+    
     return true
   } catch (e) {
-    console.error('❌ Supabase init error:', e)
+    console.error('❌ Supabase init error:', e.message)
+    console.error('Full error:', e)
     isCloudAvailable = false
+    
+    // Show user-friendly error
+    if (e.message.includes('network') || e.message.includes('Network')) {
+      console.warn('⚠️ Network issue detected - using offline mode')
+    } else if (e.message.includes('not accessible')) {
+      console.warn('⚠️ Supabase server not accessible - check firewall/proxy')
+    } else {
+      console.warn('⚠️ Cloud unavailable - using local storage only')
+    }
+    
     return false
   }
 }
@@ -59,6 +120,8 @@ async function supabaseInit() {
 // ============ AUTHENTICATION ============
 
 async function supabaseSignIn(email, password) {
+  console.log('🔐 Attempting sign in:', email)
+  
   const LOCAL_USERS = {
     'didin@company.com': '86532',
     'indra@company.com': '86086',
@@ -108,13 +171,12 @@ async function loadMachinesFromCloud() {
       .order('id', { ascending: true })
 
     if (error) {
-      console.error('Database error:', error)
+      console.error('❌ Database error:', error)
       throw error
     }
 
     if (data && data.length > 0) {
       console.log(`✅ Loaded ${data.length} machines from Supabase`)
-      // Transform to match local format
       return data.map(m => ({
         id: m.id,
         constructId: m.construct_id
@@ -157,7 +219,7 @@ async function saveMachineToCloud(machineId, constructId, userId, oldConstructId
       })
 
     if (machineError) {
-      console.error('Machine upsert error:', machineError)
+      console.error('❌ Machine upsert error:', machineError)
       throw machineError
     }
 
@@ -177,8 +239,7 @@ async function saveMachineToCloud(machineId, constructId, userId, oldConstructId
       })
 
     if (historyError) {
-      console.warn('History insert warning:', historyError)
-      // Don't fail if history fails
+      console.warn('⚠️ History insert warning:', historyError)
     }
 
     console.log(`✅ Machine ${machineId} saved to cloud`)
@@ -354,7 +415,7 @@ async function saveHistoryToCloud(historyEntry) {
   }
 }
 
-// ============ REAL-TIME LISTENERS - FIXED ============
+// ============ REAL-TIME LISTENERS ============
 
 async function setupRealtimeListeners(onMachinesChange, onConstructionsChange, onHistoryChange) {
   if (!isCloudAvailable || !supabase) {
@@ -365,31 +426,24 @@ async function setupRealtimeListeners(onMachinesChange, onConstructionsChange, o
   try {
     console.log('🔌 Setting up real-time listeners...')
 
-    // Clean up existing channels first
     cleanupListeners()
 
-    // Listen to machines with unique channel name
+    // Listen to machines
     const machinesChannel = supabase
       .channel('public:machines:' + Date.now())
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'machines' 
-        },
+        { event: '*', schema: 'public', table: 'machines' },
         async (payload) => {
           console.log('🔄 Machine update received:', payload.eventType, payload.new?.id)
           if (onMachinesChange) {
             const machines = await loadMachinesFromCloud()
-            if (machines) {
-              onMachinesChange(machines)
-            }
+            if (machines) onMachinesChange(machines)
           }
         }
       )
       .subscribe((status) => {
-        console.log('📡 Machines channel status:', status)
+        console.log('📡 Machines channel:', status)
       })
 
     realtimeChannels.push(machinesChannel)
@@ -399,23 +453,17 @@ async function setupRealtimeListeners(onMachinesChange, onConstructionsChange, o
       .channel('public:constructions:' + Date.now())
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'constructions' 
-        },
+        { event: '*', schema: 'public', table: 'constructions' },
         async (payload) => {
           console.log('🔄 Construction update received:', payload.eventType)
           if (onConstructionsChange) {
             const constructions = await loadConstructionsFromCloud()
-            if (constructions) {
-              onConstructionsChange(constructions)
-            }
+            if (constructions) onConstructionsChange(constructions)
           }
         }
       )
       .subscribe((status) => {
-        console.log('📡 Constructions channel status:', status)
+        console.log('📡 Constructions channel:', status)
       })
 
     realtimeChannels.push(constructionsChannel)
@@ -425,23 +473,17 @@ async function setupRealtimeListeners(onMachinesChange, onConstructionsChange, o
       .channel('public:history:' + Date.now())
       .on(
         'postgres_changes',
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'history' 
-        },
+        { event: 'INSERT', schema: 'public', table: 'history' },
         async (payload) => {
           console.log('🔄 New history entry received')
           if (onHistoryChange) {
             const history = await loadHistoryFromCloud()
-            if (history) {
-              onHistoryChange(history)
-            }
+            if (history) onHistoryChange(history)
           }
         }
       )
       .subscribe((status) => {
-        console.log('📡 History channel status:', status)
+        console.log('📡 History channel:', status)
       })
 
     realtimeChannels.push(historyChannel)
@@ -494,43 +536,9 @@ function getDeviceName() {
   return deviceName
 }
 
-function getMachineBlockFromNumber(machineNum) {
-  const BLOCKS = {
-    A: [{ start: 1, end: 160 }],
-    B: [
-      { start: 201, end: 220 }, { start: 261, end: 280 }, { start: 321, end: 340 },
-      { start: 381, end: 400 }, { start: 441, end: 460 }, { start: 501, end: 520 },
-      { start: 561, end: 580 }, { start: 621, end: 640 }
-    ],
-    C: [
-      { start: 181, end: 200 }, { start: 241, end: 260 }, { start: 301, end: 320 },
-      { start: 361, end: 380 }, { start: 421, end: 440 }, { start: 481, end: 500 },
-      { start: 541, end: 560 }, { start: 601, end: 620 }
-    ],
-    D: [
-      { start: 161, end: 180 }, { start: 221, end: 240 }, { start: 281, end: 300 },
-      { start: 341, end: 360 }, { start: 401, end: 420 }, { start: 461, end: 480 },
-      { start: 521, end: 540 }, { start: 581, end: 600 }
-    ]
-  }
-
-  for (const [blockName, ranges] of Object.entries(BLOCKS)) {
-    for (const range of ranges) {
-      if (machineNum >= range.start && machineNum <= range.end) {
-        return blockName
-      }
-    }
-  }
-  return '?'
-}
-
-// ============ COMPATIBILITY ALIASES ============
-
-async function firebaseInit() { return await supabaseInit() }
-async function firebaseSignIn(email, password) { return await supabaseSignIn(email, password) }
-async function firebaseSignOut() { return await supabaseSignOut() }
-
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
   cleanupListeners()
 })
+
+console.log('📦 Supabase sync module loaded')
