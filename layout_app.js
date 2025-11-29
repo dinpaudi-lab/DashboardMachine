@@ -250,12 +250,16 @@ function attachEventListeners(){
   
 const elSave = $('save-edit')
 if(elSave) elSave.addEventListener('click', async ()=>{
-  const id = Number($('modal-machine-id').textContent)
+  const modal = $('modal')
+  const id = Number(modal.dataset.machineId)  // ✅ GANTI BARIS INI
   const newC = $('modal-construct').value
   const editor = $('modal-editor').value || 'Unknown'
-  const old = machines[id-1] && machines[id-1].constructId
   
-  if(machines[id-1]) machines[id-1].constructId = newC
+  const machineIndex = machines.findIndex(m => m.id === id)  // ✅ GANTI BARIS INI
+  const old = machineIndex !== -1 ? machines[machineIndex].constructId : null  // ✅ GANTI BARIS INI
+  
+  if(machineIndex !== -1) {  // ✅ GANTI BARIS INI
+    machines[machineIndex].constructId = newC
   saveMachines()
   
   // Save to cloud
@@ -492,7 +496,7 @@ function renderGrid(){
   }
   
  function createMachineBox(machineNum, blockName, filter) {
-    const m = machines[machineNum-1] || {id:machineNum, constructId:null}
+    const m = machines.find(machine => machine.id === machineNum) || {id:machineNum, constructId:null}
     const box = document.createElement('div')
     box.className = 'machine-box'
     box.style.fontSize = '11px'
@@ -549,7 +553,7 @@ function renderGrid(){
   const searchResultText = $('search-result-text')
   if(filter && matchCount > 0){
     const machineNum = parseInt(filter)
-    const m = machines[machineNum-1]
+    const m = machines.find(machine => machine.id === machineNum)
     const c = constructions.find(x=> x.id === m?.constructId)
     const block = getMachineBlock(machineNum)
     const constructName = c ? c.name : 'Belum ditugaskan'
@@ -579,9 +583,11 @@ function openModal(id){
   }
   
   populateModalConstruct()
+
+  modal.dataset.machineId = id
   
   const sel = $('modal-construct')
-  const m = machines[id-1] || {constructId:''}
+  const m = machines.find(machine => machine.id === id) || {constructId:''}
   if(sel) sel.value = m.constructId || ''
   
   const editor = $('modal-editor')
@@ -987,6 +993,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
