@@ -75,7 +75,12 @@ constructions = loadConstructions()
 
 function loadMachines(){
   const raw = localStorage.getItem(STORAGE_KEY)
-  if(raw) return JSON.parse(raw)
+  if(raw) {
+    const loaded = JSON.parse(raw)
+    // PENTING: Sort by ID untuk memastikan urutan benar
+    loaded.sort((a, b) => a.id - b.id)
+    return loaded
+  }
   const arr = []
   for(let i=1;i<=TOTAL_MACHINES;i++){
     const c = constructions[(i-1) % constructions.length]
@@ -83,12 +88,6 @@ function loadMachines(){
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
   return arr
-}
-
-let machines = loadMachines()
-
-function saveMachines(){ 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(machines)) 
 }
 
 // ============ CLOUD HISTORY ============
@@ -982,6 +981,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
