@@ -249,7 +249,8 @@ function attachEventListeners(){
   if(elClose) elClose.addEventListener('click', closeModal)
   
 const elSave = $('save-edit')
-if(elSave) elSave.addEventListener('click', async ()=>{
+if(elSave) {
+  elSave.addEventListener('click', async ()=>{
   const modal = $('modal')
   const id = Number(modal.dataset.machineId)
   const newC = $('modal-construct').value
@@ -287,7 +288,7 @@ if(elSave) elSave.addEventListener('click', async ()=>{
   updateChart()
   showToast('Mesin diperbarui ☁️', 'success')
 })
-  
+}  
   const elConstClose = $('close-const-modal')
   if(elConstClose) elConstClose.addEventListener('click', closeConstModal)
   
@@ -994,6 +995,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
