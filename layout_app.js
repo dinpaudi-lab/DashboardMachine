@@ -753,6 +753,7 @@ async function initializeApp() {
             (newMachines) => {
               console.log('🔄 Real-time: machines updated')
               machines = newMachines
+              machines.sort((a, b) => a.id - b.id)
               saveMachines()
               renderGrid()
               updateChart()
@@ -986,6 +987,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
