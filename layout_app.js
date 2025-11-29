@@ -261,7 +261,7 @@ if(elSave) elSave.addEventListener('click', async ()=>{
   if(machineIndex !== -1) {  // ✅ GANTI BARIS INI
     machines[machineIndex].constructId = newC
   saveMachines()
-  
+  } 
   // Save to cloud
   if (typeof saveMachineToCloud !== 'undefined' && window.isCloudAvailable) {
     try {
@@ -993,6 +993,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
