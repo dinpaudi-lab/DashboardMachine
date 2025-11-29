@@ -719,6 +719,7 @@ async function initializeApp() {
           const cloudMachines = await loadMachinesFromCloud()
           if (cloudMachines && cloudMachines.length > 0) {
             machines = cloudMachines
+            machines.sort((a, b) => a.id - b.id)
             saveMachines()
             console.log('✅ Loaded machines from cloud')
           }
@@ -981,6 +982,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
