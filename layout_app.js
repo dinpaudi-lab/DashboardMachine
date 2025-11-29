@@ -89,7 +89,11 @@ function loadMachines(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
   return arr
 }
+let machines = loadMachines()
 
+function saveMachines(){ 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(machines)) 
+}
 // ============ CLOUD HISTORY ============
 let cloudHistory = []
 let isCloudSyncEnabled = false
@@ -982,6 +986,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
