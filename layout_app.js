@@ -251,17 +251,18 @@ function attachEventListeners(){
 const elSave = $('save-edit')
 if(elSave) elSave.addEventListener('click', async ()=>{
   const modal = $('modal')
-  const id = Number(modal.dataset.machineId)  // ✅ GANTI BARIS INI
+  const id = Number(modal.dataset.machineId)
   const newC = $('modal-construct').value
   const editor = $('modal-editor').value || 'Unknown'
   
-  const machineIndex = machines.findIndex(m => m.id === id)  // ✅ GANTI BARIS INI
-  const old = machineIndex !== -1 ? machines[machineIndex].constructId : null  // ✅ GANTI BARIS INI
+  const machineIndex = machines.findIndex(m => m.id === id)
+  const old = machineIndex !== -1 ? machines[machineIndex].constructId : null
   
-  if(machineIndex !== -1) {  // ✅ GANTI BARIS INI
+  if(machineIndex !== -1) {
     machines[machineIndex].constructId = newC
-  saveMachines()
-  } 
+    saveMachines()
+  }
+  
   // Save to cloud
   if (typeof saveMachineToCloud !== 'undefined' && window.isCloudAvailable) {
     try {
@@ -279,6 +280,13 @@ if(elSave) elSave.addEventListener('click', async ()=>{
     editor:editor, 
     date:new Date().toISOString()
   })
+  
+  closeModal()
+  renderGrid()
+  renderLegend()
+  updateChart()
+  showToast('Mesin diperbarui ☁️', 'success')
+})
   
   closeModal()
   renderGrid()
@@ -993,6 +1001,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
