@@ -62,8 +62,31 @@ body{margin:0;background:linear-gradient(180deg,#071026 0%, #071428 60%);color:#
 .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:999}
 .modal.hidden{display:none}
 .modal-card{background:#071022;padding:14px;border-radius:10px;width:360px}
-.modal-card label{display:block;margin-bottom:8px}
-.modal-card input, .modal-card select{width:100%;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.02);color:#fff}
+.modal-card label{display:block;margin-bottom:8px;color:#cbd5e1;
+  font-weight:600;}
+.modal-card input, .modal-card select{
+  width:100%;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+  font-size:14px;
+}
+.modal-card input::placeholder {
+  color:#94a3b8;
+}
+
+.modal-card h3 {
+  color:#fff;
+  font-weight:700;
+  margin-bottom:16px;
+  font-size:18px;
+}
+
+.modal-card h3 span {
+  color:#ffd166;
+}
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
 .btn{padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
 .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#081026}
@@ -142,3 +165,4 @@ input:focus, select:focus{outline:none;background:rgba(255,255,255,0.04)!importa
 /* Chart fade-in */
 #barChart{animation:chartFadeIn .6s ease-out forwards;opacity:0}
 @keyframes chartFadeIn{to{opacity:1}}
+
