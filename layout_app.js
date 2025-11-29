@@ -288,13 +288,6 @@ if(elSave) elSave.addEventListener('click', async ()=>{
   showToast('Mesin diperbarui ☁️', 'success')
 })
   
-  closeModal()
-  renderGrid()
-  renderLegend()
-  updateChart()
-  showToast('Mesin diperbarui ☁️', 'success')
-})
-  
   const elConstClose = $('close-const-modal')
   if(elConstClose) elConstClose.addEventListener('click', closeConstModal)
   
@@ -1001,6 +994,7 @@ window._layout = {
   updateChart,
   isCloudAvailable: () => window.isCloudAvailable
 }
+
 
 
 
